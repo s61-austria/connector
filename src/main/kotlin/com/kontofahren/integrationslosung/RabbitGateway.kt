@@ -1,8 +1,8 @@
-package com.kontofahren.connector
+package com.kontofahren.integrationslosung
 
 import com.google.gson.Gson
-import com.kontofahren.connector.Exchange.LOCATION_EXCHANGE
-import com.kontofahren.connector.Routing.EMPTY
+import com.kontofahren.integrationslosung.Exchange.LOCATION_EXCHANGE
+import com.kontofahren.integrationslosung.Routing.EMPTY
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.BuiltinExchangeType
 import com.rabbitmq.client.BuiltinExchangeType.FANOUT

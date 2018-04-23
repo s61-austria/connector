@@ -1,11 +1,15 @@
 package com.kontofahren.integrationslosung
 
 import com.google.gson.Gson
+import com.kontofahren.integrationslosung.Exchange.AUDIT_EXCHANGE
+import com.kontofahren.integrationslosung.Exchange.INVOICE_EXCHANGE
 import com.kontofahren.integrationslosung.Exchange.LOCATION_EXCHANGE
+import com.kontofahren.integrationslosung.Exchange.LOG_EXCHANGE
 import com.kontofahren.integrationslosung.Routing.EMPTY
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.BuiltinExchangeType
 import com.rabbitmq.client.BuiltinExchangeType.FANOUT
+import com.rabbitmq.client.BuiltinExchangeType.TOPIC
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
@@ -40,6 +44,9 @@ class RabbitGateway(
 
     init {
         exchangeDeclare(Exchange.LOCATION_EXCHANGE, FANOUT)
+        exchangeDeclare(INVOICE_EXCHANGE, TOPIC)
+        exchangeDeclare(LOG_EXCHANGE, TOPIC)
+        exchangeDeclare(AUDIT_EXCHANGE, FANOUT)
 
         queueDeclare(Queue.FRONTEND_LOCATION_UPDATE)
         queueDeclare(Queue.LOCATION_TO_ACTIVITY)
@@ -120,6 +127,9 @@ class RabbitGateway(
 
 enum class Exchange {
     LOCATION_EXCHANGE,
+    AUDIT_EXCHANGE,
+    LOG_EXCHANGE,
+    INVOICE_EXCHANGE
 }
 
 enum class Queue {
@@ -128,5 +138,7 @@ enum class Queue {
 }
 
 enum class Routing {
-    EMPTY
+    EMPTY,
+    ERROR,
+    CREATE,
 }

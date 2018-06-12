@@ -47,7 +47,7 @@ class RabbitGateway(
         exchangeDeclare(Exchange.LOCATION_EXCHANGE, FANOUT)
         exchangeDeclare(LOG_EXCHANGE, TOPIC)
         exchangeDeclare(AUDIT_EXCHANGE, FANOUT)
-        exchangeDeclare(INVOICE_EXCHANGE, TOPIC)
+        exchangeDeclare(INVOICE_EXCHANGE, FANOUT)
 
         queueDeclare(Queue.FRONTEND_LOCATION_UPDATE)
         queueDeclare(Queue.LOCATION_TO_ACTIVITY)

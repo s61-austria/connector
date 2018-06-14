@@ -53,11 +53,13 @@ class RabbitGateway(
         queueDeclare(Queue.LOCATION_TO_ACTIVITY)
         queueDeclare(Queue.AUDIT_SAVE)
         queueDeclare(Queue.INVOICE_GENERATION)
+        queueDeclare(Queue.INVOICE_REGENERATION)
 
         queueBind(Queue.FRONTEND_LOCATION_UPDATE, LOCATION_EXCHANGE, EMPTY)
         queueBind(Queue.LOCATION_TO_ACTIVITY, LOCATION_EXCHANGE, EMPTY)
         queueBind(Queue.AUDIT_SAVE, AUDIT_EXCHANGE, EMPTY)
         queueBind(Queue.INVOICE_GENERATION, INVOICE_EXCHANGE, EMPTY)
+        queueBind(Queue.INVOICE_REGENERATION, INVOICE_EXCHANGE, EMPTY)
     }
 
     private fun exchangeDeclare(exchange: Exchange, type: BuiltinExchangeType) = channel.exchangeDeclare(exchange.name, type)
@@ -142,6 +144,7 @@ enum class Queue {
     LOCATION_TO_ACTIVITY,
     AUDIT_SAVE,
     INVOICE_GENERATION,
+    INVOICE_REGENERATION
 }
 
 enum class Routing {

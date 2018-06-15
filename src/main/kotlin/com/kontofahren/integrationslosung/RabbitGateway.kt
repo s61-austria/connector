@@ -19,7 +19,7 @@ class RabbitGateway(
         val username: String = "user",
         val password: String = "pass",
         val vhost: String = "vhost",
-        val host: String = "localhost",
+        val host: String = "mq",
         val port: Int = 5672
 ) {
     /**

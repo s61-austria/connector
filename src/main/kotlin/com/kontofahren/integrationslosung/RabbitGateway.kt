@@ -19,7 +19,7 @@ class RabbitGateway(
         val username: String = "user",
         val password: String = "pass",
         val vhost: String = "vhost",
-        val host: String = "127.0.0.1",
+        val host: String = "mq",
         val port: Int = 5672
 ) {
     /**
@@ -62,9 +62,21 @@ class RabbitGateway(
         queueBind(Queue.INVOICE_REGENERATION, INVOICE_EXCHANGE, EMPTY)
     }
 
-    private fun exchangeDeclare(exchange: Exchange, type: BuiltinExchangeType) = channel.exchangeDeclare(exchange.name, type)
-    private fun queueDeclare(queue: Queue, durable: Boolean = true, exclusive: Boolean = false, autoDelete: Boolean = false, config: Map<String, String> = emptyMap()) = channel.queueDeclare(queue.name, durable, exclusive, autoDelete, config)
-    private fun queueBind(queue: Queue, exchange: Exchange, routing: Routing) = channel.queueBind(queue.name, exchange.name, routing.name)
+    private fun exchangeDeclare(exchange: Exchange, type: BuiltinExchangeType) = try {
+        channel.exchangeDeclare(exchange.name, type)
+    } catch (e: Exception) {
+        println("Could not declare the exchange.")
+    }
+    private fun queueDeclare(queue: Queue, durable: Boolean = true, exclusive: Boolean = false, autoDelete: Boolean = false, config: Map<String, String> = emptyMap()) = try {
+        channel.queueDeclare(queue.name, durable, exclusive, autoDelete, config)
+    } catch(e: Exception) {
+        println("Could not declare the queue")
+    }
+    private fun queueBind(queue: Queue, exchange: Exchange, routing: Routing) = try {
+        channel.queueBind(queue.name, exchange.name, routing.name)
+    } catch (e: Exception) {
+        println("Could not bind to queue")
+    }
 
     /**
      * Attach a handler function to a queue
@@ -73,19 +85,23 @@ class RabbitGateway(
      *
      */
     fun consume(queue: String, handler: (String) -> Unit) {
-        val consumer = object : DefaultConsumer(channel) {
-            override fun handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: ByteArray) {
-                val tag = envelope.deliveryTag
-                try {
-                    handler(body.toString(Charsets.UTF_8))
-                    channel.basicAck(tag, false)
-                } catch (ex: Exception) {
-                    println(ex)
+        try {
+            val consumer = object : DefaultConsumer(channel) {
+                override fun handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: ByteArray) {
+                    val tag = envelope.deliveryTag
+                    try {
+                        handler(body.toString(Charsets.UTF_8))
+                        channel.basicAck(tag, false)
+                    } catch (ex: Exception) {
+                        println(ex)
+                    }
                 }
             }
-        }
 
-        channel.basicConsume(queue, false, consumer)
+            channel.basicConsume(queue, false, consumer)
+        } catch (e: Exception) {
+            println("Could not consume")
+        }
     }
 
     /**
@@ -113,12 +129,16 @@ class RabbitGateway(
             routing: String,
             deliveryMode: Int = 2
     ) {
-        val props = BasicProperties.Builder()
-                .contentType("application/json")
-                .deliveryMode(deliveryMode)
-                .build()
-        val json = Gson().toJson(obj)
-        channel.basicPublish(exchange, routing, props, json.toByteArray(Charsets.UTF_8))
+        try {
+            val props = BasicProperties.Builder()
+                    .contentType("application/json")
+                    .deliveryMode(deliveryMode)
+                    .build()
+            val json = Gson().toJson(obj)
+            channel.basicPublish(exchange, routing, props, json.toByteArray(Charsets.UTF_8))
+        } catch(e: Exception) {
+            println("Could not publish")
+        }
     }
 
     /**
